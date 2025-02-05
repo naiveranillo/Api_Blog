@@ -4,6 +4,6 @@
     {
         public int Id { get; set; }
         public string Name { get; set; } = null!;
-        public HashSet<Post> Posts { get; set; } = new HashSet<Post>();
+        public List<Post> Posts { get; set; } = [];
     }
 }

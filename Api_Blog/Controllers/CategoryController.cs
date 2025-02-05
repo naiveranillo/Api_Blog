@@ -1,7 +1,9 @@
 ﻿using Api_Blog.DTOs.Category;
+using Api_Blog.DTOs.Post;
 using Api_Blog.Entities;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Api_Blog.Controllers
 {
@@ -20,12 +22,26 @@ namespace Api_Blog.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Post(CreateCategoryDTO createCategory)
+        public async Task<ActionResult> Post([FromBody] CreateCategoryDTO createCategory)
         {
             var category = mapper.Map<Category>(createCategory);
             context.Add(category);
             await context.SaveChangesAsync();
             return Ok();
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<CategoryDto>>> GetCategories()
+        {
+            var categories = await context.Categories
+            .Select(c => new CategoryDto
+            {
+                Id = c.Id,
+                Name = c.Name
+            })
+            .ToListAsync();
+
+            return Ok(categories);
         }
     }
 }

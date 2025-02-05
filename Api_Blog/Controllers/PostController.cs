@@ -1,4 +1,5 @@
-﻿using Api_Blog.DTOs.Post;
+﻿using Api_Blog.DTOs.Like;
+using Api_Blog.DTOs.Post;
 using Api_Blog.Entities;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
@@ -20,8 +21,8 @@ namespace Api_Blog.Controllers
             this.mapper = mapper;
         }
 
-        [HttpPost]
-        public async Task<ActionResult> Post(CreatePostDTO createPost)
+        [HttpPost("add")]
+        public async Task<ActionResult> Post([FromBody] CreatePostDTO createPost)
         {
             var post = mapper.Map<Post>(createPost);
             context.Add(post);
@@ -29,34 +30,48 @@ namespace Api_Blog.Controllers
             return Ok();
         }
 
-        [HttpGet("{postId}")]
-        public  async Task<ActionResult<GetIdPostDTO>> GetId(int postId)
+        [HttpGet("add-like/{postId}")]
+        public async Task<ActionResult> PostAddLike(int postId, [FromQuery] LikeCreateDto like)
         {
-            var post = await context.Posts
-            .Where(p => p.Id == postId)
-            .Select(p => new GetIdPostDTO
+            // aqui tomas el usuario logeado y tomas su id
+            var newLike = new Like
             {
-                Id = p.Id,
-                Title = p.Title,
-                Content = p.Content,
-                DateOfCreation = p.DateOfCreation,
-                User = new UserDto
-                {
-                    Id = p.User.Id,
-                    Name = p.User.Name,
-                    LastName = p.User.LastName,
-                    Email = p.User.Email,
-                    Password = p.User.Password
-                },
-                Category = new CategoryDto
-                {
-                    Id = p.Category.Id,
-                    Name = p.Category.Name
-                }
-            })
-            .FirstOrDefaultAsync();
+                UserId = like.UserId,
+                PostId = postId
+            };
 
-            return Ok(post);
+            var post = await context.Posts.Include(p => p.Likes).FirstOrDefaultAsync(p => p.Id == postId);
+
+            if (post == null)
+                return NotFound();
+
+            if (post.Likes.Any(l => l.UserId == like.UserId))
+                return BadRequest("El usuario ya ha dado like a este post.");
+
+            //post.Likes.Add(newLike);
+
+            context.Likes.Add(newLike);
+
+            await context.SaveChangesAsync();
+            return Ok();
+        }
+
+        [HttpGet("{postId}")]
+        public async Task<ActionResult<GetIdPostDTO>> GetId(int postId)
+        {
+            var post = await context.Posts.Include(p => p.Likes)
+                .Include(p => p.User).Include(p => p.Category).Include(p => p.Comments)
+                .ThenInclude(c => c.User)
+                .FirstOrDefaultAsync(p => p.Id == postId);
+
+            if (post == null)
+                return NotFound();
+
+
+            var postResponse = mapper.Map<GetIdPostDTO>(post);
+            postResponse.Likes = post.Likes.Count;
+
+            return Ok(postResponse);
         }
 
     }
