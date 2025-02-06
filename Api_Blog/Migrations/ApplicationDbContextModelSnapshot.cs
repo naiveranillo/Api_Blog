@@ -173,9 +173,9 @@ namespace Api_Blog.Migrations
                         .IsRequired();
 
                     b.HasOne("Api_Blog.Entities.User", "User")
-                        .WithMany()
+                        .WithMany("Comments")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Post");
@@ -192,9 +192,9 @@ namespace Api_Blog.Migrations
                         .IsRequired();
 
                     b.HasOne("Api_Blog.Entities.User", "User")
-                        .WithMany()
+                        .WithMany("Favorites")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Post");
@@ -211,9 +211,9 @@ namespace Api_Blog.Migrations
                         .IsRequired();
 
                     b.HasOne("Api_Blog.Entities.User", "User")
-                        .WithMany("Like")
+                        .WithMany("Likes")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Post");
@@ -256,7 +256,11 @@ namespace Api_Blog.Migrations
 
             modelBuilder.Entity("Api_Blog.Entities.User", b =>
                 {
-                    b.Navigation("Like");
+                    b.Navigation("Comments");
+
+                    b.Navigation("Favorites");
+
+                    b.Navigation("Likes");
                 });
 #pragma warning restore 612, 618
         }

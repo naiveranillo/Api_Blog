@@ -45,8 +45,20 @@ namespace Api_Blog.Utilities
                     }
                 }).ToList()));
 
-            //CreateMap<Category, CategoryDto>()
-            //    .F
+            CreateMap<Post, GetAllPostDTO>()
+            .ForMember(dest => dest.User, opt => opt.MapFrom(src => new UserDto
+            {
+                Id = src.User.Id,
+                Name = src.User.Name,
+                LastName = src.User.LastName,
+                Email = src.User.Email
+            }))
+            .ForMember(dest => dest.Category, opt => opt.MapFrom(src => new CategoryDto
+            {
+                Id = src.Category.Id,
+                Name = src.Category.Name
+            }))
+            .ForMember(dest => dest.Likes, opt => opt.MapFrom(src => src.Likes.Count()));
 
         }
     }

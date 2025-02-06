@@ -2,11 +2,13 @@
 using Api_Blog.DTOs.Post;
 using Api_Blog.Entities;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api_Blog.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/category")]
     public class CategoryController : ControllerBase
@@ -21,7 +23,7 @@ namespace Api_Blog.Controllers
             this.mapper = mapper;
         }
 
-        [HttpPost]
+        [HttpPost("add")]
         public async Task<ActionResult> Post([FromBody] CreateCategoryDTO createCategory)
         {
             var category = mapper.Map<Category>(createCategory);
